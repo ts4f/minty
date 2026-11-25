@@ -17,8 +17,8 @@
   --font-code: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
   /* theme tokens (overwritten by the tuner script) */
-  --fg: #D4D6D5; --fn: #E8EAE9; --kw: #5FC9A0; --kwc: #D4D6D5; --typec: #D4D6D5; --str: #D7B98E;
-  --num: #C29BB8; --dusty: #8DB5A5; --comment: #7A7E7C; --deep: #5F8575;
+  --fg: #C4C7C5; --fn: #E8EAE9; --kw: #5FC9A0; --dusty: #8DB5A5; --strc: #8DB5A5; --lavender: #ADA4D0; --sand: #D7B98E;
+  --mauve: #C29BB8; --punctc: #8F9391; --comment: #7A7E7C; --deep: #5F8575;
   --error: #E07A6F; --warn: #D9A85B;
 
   /* editor surfaces (set per surface by script) */
@@ -67,10 +67,11 @@ section { display: grid; gap: 14px; min-width: 0; }
 .no[data-git="add"]::after { background: var(--kw); }
 .no[data-git="mod"]::after { background: var(--warn); }
 
-.k { color: var(--kwc); } .t { color: var(--typec); } .s { color: var(--str); } .n { color: var(--num); }
-.f { color: var(--kw); } .fc { color: var(--dusty); } .m { color: var(--kw); } .d { color: var(--dusty); } .c { color: var(--comment); } .g { color: var(--comment); }
+.k { color: var(--kw); } .t { color: var(--lavender); } .s { color: var(--strc); } .n { color: var(--sand); }
+.pa, .pr, .d { color: var(--fg); } .dec { color: var(--mauve); }
+.f, .fc { color: var(--lavender); } .m { color: var(--kw); } .c { color: var(--comment); } .g { color: var(--punctc); }
 .h { color: var(--kw); font-weight: 700; } .b { font-weight: 700; } .i { font-style: italic; }
-.u { color: var(--num); opacity: .5; }
+.u { color: var(--fg); opacity: .5; }
 .e { text-decoration: underline wavy var(--error); text-underline-offset: 4px; text-decoration-thickness: 1px; }
 .w { text-decoration: underline wavy var(--warn); text-underline-offset: 4px; text-decoration-thickness: 1px; }
 .sel { background: var(--sel); border-radius: 2px; }
@@ -248,8 +249,8 @@ details summary { cursor: pointer; font-size: 13px; color: var(--ink-dim); }
         </div>
         <div class="switches">
           <div class="sw"><span>Background</span><div class="seg" role="group" aria-label="Background"><button type="button" data-opt="choice" data-val="warm">Warm</button><button type="button" data-opt="choice" data-val="pure">Pure grey</button></div></div>
-          <div class="sw"><span>Keywords</span><div class="seg" role="group" aria-label="Keyword color"><button type="button" data-opt="kwMode" data-val="fg">Foreground</button><button type="button" data-opt="kwMode" data-val="dim">Dimmer</button></div></div>
-          <div class="sw"><span>Types</span><div class="seg" role="group" aria-label="Type color"><button type="button" data-opt="typeMode" data-val="fg">Foreground</button><button type="button" data-opt="typeMode" data-val="lavender">Lavender</button><button type="button" data-opt="typeMode" data-val="peach">Peach</button></div></div>
+          <div class="sw"><span>Strings</span><div class="seg" role="group" aria-label="Strings"><button type="button" data-opt="strMode" data-val="dusty">Dusty</button><button type="button" data-opt="strMode" data-val="euc">Eucalyptus</button></div></div>
+          <div class="sw"><span>Punctuation</span><div class="seg" role="group" aria-label="Punctuation"><button type="button" data-opt="punctMode" data-val="grey">Grey</button><button type="button" data-opt="punctMode" data-val="fg">Foreground</button></div></div>
         </div>
         <div class="legend">Ratio = contrast against the selected background. Target 4.5 for text, 3.5 for comments, 3.0 for UI outlines.</div>
         <div class="rows" id="rows"></div>
@@ -271,31 +272,30 @@ details summary { cursor: pointer; font-size: 13px; color: var(--ink-dim); }
 (() => {
   const DEFAULTS = {
     bgWarm: "#1F1E1D", bgPure: "#1E1E1E",
-    fg: "#D4D6D5", kwDim: "#B9BDBB", kw: "#5FC9A0", lavender: "#ADA4D0", peach: "#D9A38A", str: "#D7B98E",
-    num: "#C29BB8", dusty: "#8DB5A5", comment: "#7A7E7C", deep: "#5F8575",
+    fg: "#C4C7C5", kw: "#5FC9A0", dusty: "#8DB5A5", lavender: "#ADA4D0", sand: "#D7B98E",
+    mauve: "#C29BB8", punct: "#8F9391", comment: "#7A7E7C", deep: "#5F8575",
     error: "#E07A6F", warn: "#D9A85B"
   };
   const ROLES = [
     { key: "bgWarm", label: "Background, warm", hint: "editor surface", target: null },
     { key: "bgPure", label: "Background, pure grey", hint: "editor surface", target: null },
-    { key: "fg", label: "Foreground", hint: "variables, keywords, types", target: 4.5 },
-    { key: "kwDim", label: "Dimmer keywords", hint: "when Keywords = Dimmer", target: 4.5 },
-    { key: "kw", label: "Eucalyptus", hint: "function declarations, headings, accents", target: 4.5 },
-    { key: "dusty", label: "Dusty eucalyptus", hint: "calls, keys, decorators, attrs", target: 4.5 },
-    { key: "lavender", label: "Lavender", hint: "when Types = Lavender", target: 4.5 },
-    { key: "peach", label: "Peach", hint: "when Types = Peach", target: 4.5 },
-    { key: "str", label: "Sand", hint: "strings", target: 4.5 },
-    { key: "num", label: "Mauve", hint: "numbers, constants", target: 4.5 },
+    { key: "fg", label: "Foreground", hint: "all identifiers", target: 4.5 },
+    { key: "kw", label: "Eucalyptus", hint: "keywords, headings, accents", target: 4.5 },
+    { key: "dusty", label: "Dusty eucalyptus", hint: "strings", target: 4.5 },
+    { key: "lavender", label: "Lavender", hint: "functions, types, tags", target: 4.5 },
+    { key: "sand", label: "Sand", hint: "numbers, escapes, constants", target: 4.5 },
+    { key: "mauve", label: "Mauve", hint: "decorators, type params", target: 4.5 },
+    { key: "punct", label: "Punctuation", hint: "operators, brackets", target: 3.5 },
     { key: "comment", label: "Comments", hint: "and quiet punctuation", target: 3.5 },
     { key: "deep", label: "Deep eucalyptus", hint: "selection, bracket match", target: 3.0 },
     { key: "error", label: "Errors", hint: "and deletions", target: 4.5 },
     { key: "warn", label: "Warnings", hint: "and modifications", target: 4.5 }
   ];
-  const STORE = "minty-preview-v3";
+  const STORE = "minty-preview-v5";
 
   let pal = { ...DEFAULTS };
   let choice = "pure";
-  let O = { kwMode: "fg", typeMode: "lavender" };
+  let O = { strMode: "dusty", punctMode: "grey" };
   try {
     const saved = JSON.parse(localStorage.getItem(STORE) || "null");
     if (saved && saved.pal) { pal = { ...DEFAULTS, ...saved.pal }; choice = saved.choice === "warm" ? "warm" : "pure"; O = { ...O, ...(saved.O || {}) }; }
@@ -332,51 +332,51 @@ details summary { cursor: pointer; font-size: 13px; color: var(--ink-dim); }
 
 «c|// Fetch users and keep only the active ones»
 «k|export» «k|interface» «t|UserQuery» {
-  limit: «t|number»;
-  active?: «t|boolean»;
+  «pr|limit»: «t|number»;
+  «pr|active»?: «t|boolean»;
 }
 
 «k|const» «u|MAX_RETRIES» = «n|3»;  «c|// unused, so it fades»
 
-«k|export» «k|async» «k|function» «f|loadUsers»(path: «t|string», «sel|query»: «t|UserQuery»): «t|Promise»<«t|User»[]> {
-  «k|const» raw = «k|await» «fc|readFile»(path, «s|"utf8"»);«caret|»
+«k|export» «k|async» «k|function» «f|loadUsers»(«pa|path»: «t|string», «pa|query»: «t|UserQuery»): «t|Promise»<«t|User»[]> {
+  «k|const» raw = «k|await» «fc|readFile»(«pa|path», «s|"utf8"»);«caret|»
   «k|const» users: «t|User»[] = «t|JSON».«fc|parse»(raw);
-  «k|return» users
-    .«fc|filter»((user) «k|=>» user.active === («sel|query».active ?? «n|true»))
-    .«fc|slice»(«n|0», «sel|query».«e|limt»);
+  «k|return» «sel|users»
+    .«fc|filter»((«pa|user») => «pa|user».«pr|active» === («pa|query».«pr|active» ?? «n|true»))
+    .«fc|slice»(«n|0», «pa|query».«e|limt»);
 }
 
 «k|class» «t|UserCache»<«t|T» «k|extends» «t|User»> {
-  «k|private» items = «k|new» «t|Map»<«t|string», «t|T»>();
-  «k|constructor»(«k|private» «k|readonly» ttl = «n|60_000») «bm|{}»
-  «f|get»(id: «t|string»): «t|T» | «n|undefined» {
-    «k|return» «k|this».items.«fc|get»(id);
+  «k|private» «pr|items» = «k|new» «t|Map»<«t|string», «t|T»>();
+  «k|constructor»(«k|private» «k|readonly» «pa|ttl» = «n|60_000») «bm|{}»
+  «f|get»(«pa|id»: «t|string»): «t|T» | «t|undefined» {
+    «k|return» «k|this».«pr|items».«fc|get»(«pa|id»);
   }
 }` },
     py: { file: "leaf.py", lang: "Python", dir: "src", cur: 14, pos: "Ln 15, Col 9", git: {}, code:
-`«k|from» dataclasses «k|import» «d|dataclass», field
+`«k|from» dataclasses «k|import» dataclass, field
 «k|from» pathlib «k|import» «t|Path»
 
-«n|DEFAULT_TIMEOUT» = «n|30»  «c|# seconds»
+DEFAULT_TIMEOUT = «n|30»  «c|# seconds»
 
 
-«d|@dataclass»
+«dec|@dataclass»
 «k|class» «t|Leaf»:
     «s|"""A single eucalyptus leaf sample."""»
-    species: «t|str»
-    length_mm: «t|float»
-    tags: «t|list»[«t|str»] = «fc|field»(default_factory=«t|list»)
+    «pr|species»: «t|str»
+    «pr|length_mm»: «t|float»
+    «pr|tags»: «t|list»[«t|str»] = «fc|field»(«pa|default_factory»=«t|list»)
 
-    «k|def» «f|describe»(«k|self») -> «t|str»:
-        «k|return» «k|f»«s|"»«k|{»«k|self».species«k|}»«s|: »«k|{»«k|self».length_mm«k|:».1f«k|}»«s| mm"»
+    «k|def» «f|describe»(«pa|self») -> «t|str»:
+        «k|return» f«s|"»«n|{»«pa|self».«pr|species»«n|}»«s|: »«n|{»«pa|self».«pr|length_mm»«n|:.1f»«n|}»«s| mm»«n|\\n»«s|"»
 
 
-«k|def» «f|load»(path: «t|Path», limit: «t|int» | «n|None» = «n|None») -> «t|list»[«t|Leaf»]:
-    «k|with» path.«fc|open»() «k|as» fh:
+«k|def» «f|load»(«pa|path»: «t|Path», «pa|limit»: «t|int» | «n|None» = «n|None») -> «t|list»[«t|Leaf»]:
+    «k|with» «pa|path».«fc|open»() «k|as» fh:
         rows = [line.«fc|split»(«s|","») «k|for» line «k|in» fh «k|if» line.«fc|strip»()]
     «k|if» «k|not» rows:
         «k|raise» «t|ValueError»(«s|"empty file"»)
-    «k|return» [«t|Leaf»(name, «t|float»(size)) «k|for» name, size «k|in» rows[:limit]]` },
+    «k|return» [«t|Leaf»(name, «t|float»(size)) «k|for» name, size «k|in» rows[:«pa|limit»]]` },
     json: { file: "package.json", lang: "JSON", dir: "", cur: 2, pos: "Ln 3, Col 14", git: { 6: "add", 7: "add", 8: "add", 9: "add" }, code:
 `«g|{»
   «d|"name"»«g|:» «s|"minty"»«g|,»
@@ -409,39 +409,39 @@ details summary { cursor: pointer; font-size: 13px; color: var(--ink-dim); }
     css: { file: "styles.css", lang: "CSS", dir: "src", cur: 11, pos: "Ln 12, Col 18", git: {}, code:
 `«k|@import» «fc|url»(«s|"./reset.css"»);
 
-«d|:root» {
+«t|:root» {
   --gap: «n|12px»;
   --accent: «n|#5fc9a0»;
 }
 
-«d|.card» > «d|h2»,
-«d|#sidebar» «d|.title» {
-  display: «s|flex»;
+«t|.card» > «t|h2»,
+«t|#sidebar» «t|.title» {
+  display: «n|flex»;
   gap: «fc|var»(--gap);
   padding: «n|0.5rem» «n|1rem»;
   color: «fc|var»(--accent) «k|!important»;
 }
 
-«k|@media» («s|max-width»: «n|600px») {
-  «d|.card» { flex-direction: «s|column»; }
+«k|@media» (max-width: «n|600px») {
+  «t|.card» { flex-direction: «n|column»; }
 }` },
     html: { file: "index.html", lang: "HTML", dir: "src", cur: 11, pos: "Ln 12, Col 24", git: { 11: "add" }, code:
-`«g|<!»«k|doctype» «d|html»«g|>»
-«g|<»«k|html» «d|lang»«g|=»«s|"en"»«g|>»
-  «g|<»«k|head»«g|>»
-    «g|<»«k|meta» «d|charset»«g|=»«s|"utf-8"» «g|/>»
-    «g|<»«k|title»«g|>»Minty«g|</»«k|title»«g|>»
-    «g|<»«k|link» «d|rel»«g|=»«s|"stylesheet"» «d|href»«g|=»«s|"./styles.css"» «g|/>»
-  «g|</»«k|head»«g|>»
-  «g|<»«k|body» «d|class»«g|=»«s|"dark"»«g|>»
+`«g|<!»«k|doctype» html«g|>»
+«g|<»«t|html» «d|lang»«g|=»«s|"en"»«g|>»
+  «g|<»«t|head»«g|>»
+    «g|<»«t|meta» «d|charset»«g|=»«s|"utf-8"» «g|/>»
+    «g|<»«t|title»«g|>»Minty«g|</»«t|title»«g|>»
+    «g|<»«t|link» «d|rel»«g|=»«s|"stylesheet"» «d|href»«g|=»«s|"./styles.css"» «g|/>»
+  «g|</»«t|head»«g|>»
+  «g|<»«t|body» «d|class»«g|=»«s|"dark"»«g|>»
     «c|<!-- main content -->»
-    «g|<»«k|main» «d|id»«g|=»«s|"app"»«g|>»
-      «g|<»«k|h1»«g|>»Eucalyptus«g|</»«k|h1»«g|>»
+    «g|<»«t|main» «d|id»«g|=»«s|"app"»«g|>»
+      «g|<»«t|h1»«g|>»Eucalyptus«g|</»«t|h1»«g|>»
       «g|<»«t|InstallButton» «d|variant»«g|=»«s|"primary"» «d|disabled» «g|/>»
-    «g|</»«k|main»«g|>»
-  «g|</»«k|body»«g|>»
-«g|</»«k|html»«g|>»` },
-    md: { file: "README.md", lang: "Markdown", dir: "", cur: 2, pos: "Ln 3, Col 30", git: { 15: "add", 16: "add", 17: "add" }, code:
+    «g|</»«t|main»«g|>»
+  «g|</»«t|body»«g|>»
+«g|</»«t|html»«g|>»` },
+    md: { file: "README.md", lang: "Markdown", dir: "", cur: 2, pos: "Ln 3, Col 30", git: { 15: "add", 16: "add", 17: "add" }, punct: false, code:
 `«h|# Minty»
 
 A dark theme built around «b|**eucalyptus green**».
@@ -454,7 +454,7 @@ A dark theme built around «b|**eucalyptus green**».
 
 «m|>» «c|Easy on the eyes for long sessions.»
 
-Run «s|\`npm run build\`» or see «d|[the docs]»«c|(https://example.com/docs)».
+Run «s|\`npm run build\`» or see «t|[the docs]»«c|(https://example.com/docs)».
 
 «c|\`\`\`ts»
 «s|const theme = "minty";»
@@ -463,7 +463,12 @@ Run «s|\`npm run build\`» or see «d|[the docs]»«c|(https://example.com/docs
   const ORDER = ["ts", "py", "json", "yaml", "css", "html", "md"];
 
   const esc = s => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  const parse = s => esc(s).replace(/«(\w+)\|([^»]*)»/g, (_, c, t) => c === "caret" ? '<span class="caret"></span>' : `<span class="${c}">${t}</span>`);
+  const punct = t => esc(t).replace(/(&lt;|&gt;|&amp;|[.,;:(){}\[\]=+*\/?!|])+/g, m => `<span class="g">${m}</span>`);
+  const parse = (s, greyPunct = true) => s.split(/(«\w+\|[^»]*»)/).map(part => {
+    const m = part.match(/^«(\w+)\|([^»]*)»$/);
+    if (m) return m[1] === "caret" ? '<span class="caret"></span>' : `<span class="${m[1]}">${esc(m[2])}</span>`;
+    return greyPunct ? punct(part) : esc(part);
+  }).join("");
 
   function renderCode(el, sample, opts = {}) {
     const lines = sample.code.split("\n");
@@ -471,7 +476,7 @@ Run «s|\`npm run build\`» or see «d|[the docs]»«c|(https://example.com/docs
     el.innerHTML = lines.slice(0, max).map((line, i) => {
       const git = sample.git && sample.git[i + 1] ? ` data-git="${sample.git[i + 1]}"` : "";
       const cur = i === sample.cur ? " cur" : "";
-      return `<div class="ln${cur}"><span class="no"${git}>${i + 1}</span><span>${parse(line) || " "}</span></div>`;
+      return `<div class="ln${cur}"><span class="no"${git}>${i + 1}</span><span>${parse(line, sample.punct !== false) || " "}</span></div>`;
     }).join("");
   }
 
@@ -533,9 +538,9 @@ Run «s|\`npm run build\`» or see «d|[the docs]»«c|(https://example.com/docs
 
   function apply() {
     const root = document.documentElement.style;
-    ["fg", "kw", "str", "num", "dusty", "comment", "deep", "error", "warn"].forEach(k => root.setProperty("--" + k, pal[k]));
-    root.setProperty("--kwc", O.kwMode === "dim" ? pal.kwDim : pal.fg);
-    root.setProperty("--typec", O.typeMode === "lavender" ? pal.lavender : O.typeMode === "peach" ? pal.peach : pal.fg);
+    ["fg", "kw", "dusty", "lavender", "sand", "mauve", "comment", "deep", "error", "warn"].forEach(k => root.setProperty("--" + k, pal[k]));
+    root.setProperty("--strc", O.strMode === "euc" ? pal.kw : pal.dusty);
+    root.setProperty("--punctc", O.punctMode === "fg" ? pal.fg : pal.punct);
     document.querySelectorAll("[data-surface]").forEach(el => {
       const key = el.dataset.surface;
       const bg = key === "current" ? currentBg() : pal[key];
@@ -563,7 +568,7 @@ Run «s|\`npm run build\`» or see «d|[the docs]»«c|(https://example.com/docs
         out.title = `Target ${r.target}`;
       }
     });
-    document.getElementById("json").value = JSON.stringify({ background: choice, keywords: O.kwMode, types: O.typeMode, ...pal }, null, 2);
+    document.getElementById("json").value = JSON.stringify({ background: choice, strings: O.strMode, punctuation: O.punctMode, ...pal }, null, 2);
     save();
   }
 

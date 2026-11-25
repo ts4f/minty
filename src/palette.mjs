@@ -6,17 +6,18 @@ import { mix } from "./color.mjs";
 /** Base palette. Each value is an opaque #RRGGBB color. */
 export const base = {
   bg: "#1E1E1E", // editor background, pure grey
-  fg: "#D4D6D5", // variables, properties, keywords, operators
+  fg: "#C4C7C5", // identifiers, function calls, object keys
   fgBright: "#E8EAE9", // active tab and other emphasized UI text
 
-  eucalyptus: "#5FC9A0", // function declarations, Markdown headings, UI accents
-  dusty: "#8DB5A5", // function calls, decorators, JSON/YAML keys, HTML attributes, CSS selectors
+  eucalyptus: "#82CBAD", // pastel eucalyptus: keywords, Markdown headings, UI accents
+  dusty: "#8DB5A5", // strings: the quieter green
   deep: "#5F8575", // selection, bracket match, find matches, focus
 
-  lavender: "#ADA4D0", // types, classes, interfaces
-  sand: "#D7B98E", // strings
-  mauve: "#C29BB8", // numbers, constants, booleans
-  comment: "#7A7E7C", // comments and quiet punctuation
+  lavender: "#ADA4D0", // types, classes, interfaces, function declarations
+  sand: "#D7B98E", // numbers, constants, booleans
+  mauve: "#C29BB8", // properties, fields, decorators
+  punct: "#8F9391", // punctuation and operators
+  comment: "#7A7E7C", // comments
 
   error: "#E07A6F", // errors, deletions
   warning: "#D9A85B", // warnings, modifications
@@ -62,12 +63,25 @@ export function ansi(p) {
   };
 }
 
-/** Theme variants. Add an entry here to ship another flavor later. */
+/**
+ * Theme variants. Each one maps syntax roles to palette colors:
+ *   keyword    language words: const, if, return, def, import
+ *   string     string literals
+ *   func       function and method declarations
+ *   call       function and method calls
+ *   type       classes, interfaces, types, JSX components
+ *   tag        HTML tags, CSS selectors, Markdown links
+ *   value      numbers, booleans, null, escapes, CSS keyword values
+ *   decorator  decorators, annotations, type parameters
+ *   prop       property access after a dot, class and interface fields
+ * Identifiers always use fg; punctuation uses punct; comments use comment.
+ */
 export const variants = [
   {
     file: "minty-color-theme.json",
     name: "Minty",
     palette: base,
+    roles: { keyword: "eucalyptus", string: "dusty", func: "lavender", call: "fg", type: "lavender", tag: "lavender", value: "sand", decorator: "mauve", prop: "mauve" },
   },
 ];
 
@@ -81,6 +95,7 @@ export const contrastTargets = {
   mauve: 4.5,
   error: 4.5,
   warning: 4.5,
+  punct: 4.5,
   comment: 3.5,
   deep: 3.0,
 };
