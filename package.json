@@ -2,7 +2,7 @@
   "name": "minty",
   "displayName": "Minty",
   "description": "A calm, minimal dark theme built around eucalyptus green.",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "publisher": "your-publisher-id",
   "license": "MIT",
   "engines": {

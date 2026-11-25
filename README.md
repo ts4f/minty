@@ -2,7 +2,7 @@
 
 A calm, minimal dark theme for VS Code built around eucalyptus green.
 
-Most code stays off-white, in the spirit of the JetBrains dark themes. Color shows up only where it carries meaning: eucalyptus marks where functions are defined, a dustier green marks where they are used, and a few soft accents pick out types, strings and numbers. The background is a pure charcoal grey with no blue tint.
+Most code stays off-white, in the spirit of the JetBrains dark themes. Color shows up only where it carries meaning: pastel eucalyptus marks keywords, a dustier green marks strings, lavender marks types and function declarations, and mauve marks properties and fields. The background is a pure charcoal grey with no blue tint.
 
 ![TypeScript](images/ts.png)
 
@@ -13,12 +13,13 @@ Most code stays off-white, in the spirit of the JetBrains dark themes. Color sho
 | Role | Color |
 |---|---|
 | Background | `#1E1E1E` |
-| Variables, properties, keywords, operators | `#D4D6D5` off-white |
-| Function declarations, Markdown headings, UI accents | `#5FC9A0` eucalyptus |
-| Function calls, decorators, JSON/YAML keys, HTML attributes, CSS selectors | `#8DB5A5` dusty eucalyptus |
-| Types, classes, interfaces | `#ADA4D0` lavender |
-| Strings | `#D7B98E` sand |
-| Numbers, constants, booleans | `#C29BB8` mauve |
+| Variables, parameters, function calls, object keys | `#C4C7C5` off-white |
+| Keywords, Markdown headings, UI accents | `#82CBAD` eucalyptus |
+| Strings | `#8DB5A5` dusty eucalyptus |
+| Function declarations, types, classes, interfaces, HTML tags | `#ADA4D0` lavender |
+| Properties, fields, decorators | `#C29BB8` mauve |
+| Numbers, constants, booleans | `#D7B98E` sand |
+| Punctuation and operators | `#8F9391` grey |
 | Comments | `#7A7E7C` grey |
 | Selection, bracket match, find matches | `#5F8575` deep eucalyptus |
 | Errors / warnings | `#E07A6F` coral / `#D9A85B` amber |

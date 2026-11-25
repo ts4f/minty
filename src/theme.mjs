@@ -1,15 +1,9 @@
-// Builds a VS Code color theme object from a palette.
-// Color rules:
-//   foreground  variables, properties, keywords, operators, HTML tags
-//   eucalyptus  function declarations, Markdown headings and list markers, UI accents
-//   dusty       function calls, decorators, JSON/YAML keys, HTML attributes, CSS selectors
-//   lavender    types, classes, interfaces, JSX components
-//   sand        strings
-//   mauve       numbers, constants, booleans
-//   grey        comments and quiet punctuation
+// Builds a VS Code color theme object from a palette and a variant's role map.
+// Structure (inspired by Skol): identifiers are plain, punctuation recedes to grey,
+// and a few accent roles carry meaning. See `variants` in palette.mjs for the role map.
 // No bold or italic, except in Markdown.
 
-import { alpha } from "./color.mjs";
+import { alpha, mix } from "./color.mjs";
 import { ansi, derive } from "./palette.mjs";
 
 const rule = (name, scope, foreground, fontStyle) => ({
@@ -261,14 +255,14 @@ export function buildTheme(variant) {
     "checkbox.foreground": c.eucalyptus,
     "button.background": c.eucalyptus,
     "button.foreground": c.onAccent,
-    "button.hoverBackground": "#74D3AD",
+    "button.hoverBackground": mix(c.eucalyptus, "#FFFFFF", 0.12),
     "button.separator": alpha(c.onAccent, 0.4),
     "button.secondaryBackground": c.input,
     "button.secondaryForeground": c.fg,
     "button.secondaryHoverBackground": c.border,
     "extensionButton.prominentBackground": c.eucalyptus,
     "extensionButton.prominentForeground": c.onAccent,
-    "extensionButton.prominentHoverBackground": "#74D3AD",
+    "extensionButton.prominentHoverBackground": mix(c.eucalyptus, "#FFFFFF", 0.12),
     "badge.background": c.eucalyptus,
     "badge.foreground": c.onAccent,
     "keybindingLabel.background": c.input,
@@ -391,39 +385,85 @@ export function buildTheme(variant) {
     "charts.purple": c.mauve,
   };
 
+  const r = (role) => c[variant.roles[role]];
+  const K = r("keyword"), S = r("string"), F = r("func"), C = r("call"), T = r("type"), G = r("tag"), V = r("value"), D = r("decorator"), PR = r("prop");
+  const P = c.punct;
+
   const tokenColors = [
-    // ----- base -----
-    rule("Foreground: variables, keywords, operators", [
+    // ----- identifiers: plain -----
+    rule("Identifiers", [
       "variable",
       "variable.other",
       "variable.parameter",
-      "variable.language",
       "support.variable",
+      "meta.object-literal.key",
+      "entity.name.namespace",
+      "entity.name.type.module",
+      "constant.other.caps",
+      "variable.other.constant",
+      "variable.language.special.self",
+      "variable.parameter.function.language.special.self",
+      "variable.language.special.cls",
+      "variable.parameter.function.language.special.cls",
+    ], c.fg),
+
+    // ----- properties and fields: member access after a dot, class/interface field declarations -----
+    // Object-literal keys (meta.object-literal.key) stay plain. Method calls after a dot are
+    // entity.name.function / meta.function-call.generic, so they keep the call color.
+    rule("Properties and fields", [
+      "variable.other.property",
+      "variable.other.object.property",
+      "variable.other.constant.property",
+      "variable.object.property",
+      "meta.definition.property variable.object.property",
+      "support.variable.property",
+      "meta.member.access.python meta.attribute.python",
+      "meta.member.access.python meta.item-access.python meta.indexed-name.python",
+    ], PR),
+
+    // ----- punctuation and operators: recede -----
+    rule("Punctuation and operators", ["punctuation", "keyword.operator", "meta.brace", "storage.type.function.arrow", "punctuation.separator", "punctuation.terminator", "punctuation.accessor"], P),
+
+    // ----- keywords -----
+    rule("Keywords", [
       "keyword",
       "keyword.control",
-      "keyword.operator",
+      "keyword.other",
       "storage",
       "storage.type",
       "storage.modifier",
-      "meta.object-literal.key",
-      "punctuation",
-      "entity.name.namespace",
-      "entity.name.type.module",
-    ], c.fg),
+      "variable.language.this",
+      "variable.language.super",
+      "keyword.operator.new",
+      "keyword.operator.expression",
+      "keyword.operator.wordlike",
+      "keyword.operator.logical.python",
+      "keyword.operator.in",
+      "keyword.operator.instanceof",
+      "keyword.operator.typeof",
+      "keyword.operator.delete",
+      "keyword.operator.void",
+      "keyword.operator.of",
+    ], K),
     rule("Comments", ["comment", "punctuation.definition.comment"], c.comment),
-    rule("Strings", ["string", "punctuation.definition.string", "string.template", "string.regexp"], c.sand),
-    rule("Template expression delimiters", ["punctuation.definition.template-expression", "punctuation.section.embedded"], c.fg),
-    rule("Numbers, constants, booleans", [
+    rule("Strings", ["string", "punctuation.definition.string", "string.template", "string.regexp", "string.quoted.docstring"], S),
+    rule("Values: numbers, constants, escapes", [
       "constant.numeric",
       "constant.language",
       "constant.character",
       "constant.character.escape",
-      "constant.other.caps",
+      "constant.character.format.placeholder.other.python",
+      "storage.type.format.python",
+      "support.other.format.python",
+      "punctuation.definition.template-expression",
+      "punctuation.section.embedded",
+      "meta.fstring.python punctuation.definition.string.interpolation",
       "variable.other.enummember",
       "support.constant.math",
-    ], c.mauve),
+    ], V),
+    rule("Python f-string prefix", ["storage.type.string.python"], K),
 
-    // ----- types -----
+    // ----- named things -----
     rule("Types and classes", [
       "entity.name.type",
       "entity.name.class",
@@ -436,38 +476,35 @@ export function buildTheme(variant) {
       "entity.name.type.interface",
       "entity.name.type.alias",
       "entity.name.type.enum",
-      "entity.name.type.parameter",
       "support.class.component",
-    ], c.lavender),
-
-    // ----- functions -----
-    rule("Function calls", ["entity.name.function", "support.function", "meta.function-call.generic", "variable.function"], c.dusty),
+    ], T),
+    rule("Function calls", [
+      "entity.name.function",
+      "support.function",
+      "meta.function-call.generic",
+      "variable.function",
+    ], C),
     rule("Function declarations", [
       "meta.definition.function entity.name.function",
       "meta.definition.method entity.name.function",
-      "meta.definition.variable entity.name.function",
-      "meta.object-literal.key entity.name.function",
       "meta.function.python entity.name.function.python",
-      "entity.name.function.declaration",
-    ], c.eucalyptus),
-    rule("Decorators", [
+    ], F),
+    rule("Decorators and type parameters", [
       "meta.decorator",
-      "meta.decorator entity.name.function",
+      // child combinators: only the decorator name, not identifiers or calls inside its arguments
+      "meta.decorator > meta.function-call > entity.name.function",
       "meta.decorator punctuation.decorator",
-      "meta.decorator variable.other.readwrite",
+      "meta.decorator > variable.other.readwrite",
       "entity.name.function.decorator",
       "meta.function.decorator entity.name.function.decorator",
       "meta.function.decorator support.type",
       "punctuation.definition.decorator",
-    ], c.dusty),
+      "entity.name.type.parameter",
+    ], D),
 
-    // ----- Python -----
-    rule("Python self and cls", ["variable.language.special.self", "variable.parameter.function.language.special.self", "variable.language.special.cls", "variable.parameter.function.language.special.cls"], c.fg),
-    rule("Python f-string braces and prefix", ["constant.character.format.placeholder.other.python", "storage.type.string.python", "meta.fstring.python punctuation.definition.string.interpolation"], c.fg),
-
-    // ----- JSON -----
-    rule("JSON keys", ["support.type.property-name.json", "support.type.property-name.json punctuation", "meta.structure.dictionary.key.json string"], c.dusty),
-    rule("JSON punctuation", [
+    // ----- JSON / YAML -----
+    rule("JSON and YAML keys", ["support.type.property-name.json", "support.type.property-name.json punctuation", "meta.structure.dictionary.key.json string", "entity.name.tag.yaml"], c.fg),
+    rule("JSON and YAML punctuation", [
       "punctuation.definition.dictionary.begin.json",
       "punctuation.definition.dictionary.end.json",
       "punctuation.definition.array.begin.json",
@@ -475,10 +512,12 @@ export function buildTheme(variant) {
       "punctuation.separator.dictionary.key-value.json",
       "punctuation.separator.dictionary.pair.json",
       "punctuation.separator.array.json",
-    ], c.comment),
-
-    // ----- YAML -----
-    rule("YAML keys", ["entity.name.tag.yaml"], c.dusty),
+      "punctuation.separator.key-value.mapping.yaml",
+      "punctuation.definition.block.sequence.item.yaml",
+      "punctuation.separator.sequence.yaml",
+      "punctuation.definition.sequence.begin.yaml",
+      "punctuation.definition.sequence.end.yaml",
+    ], P),
     rule("YAML anchors, aliases, tags", [
       "entity.name.type.anchor.yaml",
       "variable.other.alias.yaml",
@@ -488,14 +527,14 @@ export function buildTheme(variant) {
       "storage.type.tag-handle.yaml",
       "keyword.other.merge.yaml",
       "constant.language.merge.yaml",
-    ], c.fg),
-    rule("YAML punctuation", ["punctuation.separator.key-value.mapping.yaml", "punctuation.definition.block.sequence.item.yaml", "punctuation.separator.sequence.yaml", "punctuation.definition.sequence.begin.yaml", "punctuation.definition.sequence.end.yaml"], c.comment),
+    ], K),
 
     // ----- HTML / JSX -----
-    rule("HTML tag names", ["entity.name.tag"], c.fg),
-    rule("HTML attributes", ["entity.other.attribute-name"], c.dusty),
-    rule("HTML tag brackets", ["punctuation.definition.tag", "meta.tag.sgml punctuation", "punctuation.separator.key-value.html"], c.comment),
-    rule("HTML entities", ["constant.character.entity", "constant.character.entity punctuation.definition.entity"], c.mauve),
+    rule("HTML tag names", ["entity.name.tag"], G),
+    rule("HTML attributes", ["entity.other.attribute-name"], c.fg),
+    rule("HTML tag brackets", ["punctuation.definition.tag", "meta.tag.sgml punctuation", "punctuation.separator.key-value.html"], P),
+    rule("HTML doctype", ["meta.tag.sgml.doctype entity.name.tag", "meta.tag.sgml.doctype"], K),
+    rule("HTML entities", ["constant.character.entity", "constant.character.entity punctuation.definition.entity"], V),
 
     // ----- CSS -----
     rule("CSS selectors", [
@@ -513,7 +552,7 @@ export function buildTheme(variant) {
       "entity.name.tag.reference.scss",
       "meta.selector",
       "punctuation.definition.entity.css",
-    ], c.dusty),
+    ], G),
     rule("CSS properties and custom properties", [
       "support.type.property-name.css",
       "support.type.property-name.scss",
@@ -524,9 +563,18 @@ export function buildTheme(variant) {
       "variable.argument.css",
       "variable.scss",
     ], c.fg),
-    rule("CSS keyword values", ["support.constant.property-value.css", "support.constant.font-name", "support.constant.color", "support.constant.media", "support.constant.vendored.property-value.css"], c.sand),
-    rule("CSS numbers, units, colors", ["constant.numeric.css", "keyword.other.unit", "constant.other.color.rgb-value", "constant.other.color.rgb-value punctuation.definition.constant"], c.mauve),
-    rule("CSS at-rules and !important", ["keyword.control.at-rule", "keyword.control.at-rule punctuation.definition.keyword", "keyword.other.important"], c.fg),
+    rule("CSS keyword values, numbers, units, colors", [
+      "support.constant.property-value.css",
+      "support.constant.font-name",
+      "support.constant.color",
+      "support.constant.media",
+      "support.constant.vendored.property-value.css",
+      "constant.numeric.css",
+      "keyword.other.unit",
+      "constant.other.color.rgb-value",
+      "constant.other.color.rgb-value punctuation.definition.constant",
+    ], V),
+    rule("CSS at-rules and !important", ["keyword.control.at-rule", "keyword.control.at-rule punctuation.definition.keyword", "keyword.other.important"], K),
 
     // ----- Markdown -----
     rule("Markdown headings", ["markup.heading", "entity.name.section.markdown", "punctuation.definition.heading.markdown", "markup.heading.setext"], c.eucalyptus, "bold"),
@@ -536,9 +584,9 @@ export function buildTheme(variant) {
     rule("Markdown bold italic", ["markup.bold markup.italic", "markup.italic markup.bold"], c.fg, "bold italic"),
     rule("Markdown strikethrough", ["markup.strikethrough"], c.fg, "strikethrough"),
     rule("Markdown quote text", ["markup.quote"], c.comment),
-    rule("Markdown inline code", ["markup.inline.raw", "markup.inline.raw punctuation.definition.raw.markdown", "markup.raw.block.markdown"], c.sand),
+    rule("Markdown inline code", ["markup.inline.raw", "markup.inline.raw punctuation.definition.raw.markdown", "markup.raw.block.markdown"], S),
     rule("Markdown code fences", ["punctuation.definition.markdown", "fenced_code.block.language", "markup.fenced_code.block.markdown punctuation.definition"], c.comment),
-    rule("Markdown link text", ["string.other.link.title.markdown", "string.other.link.description.markdown", "string.other.link.description.title.markdown", "constant.other.reference.link.markdown"], c.dusty),
+    rule("Markdown link text", ["string.other.link.title.markdown", "string.other.link.description.markdown", "string.other.link.description.title.markdown", "constant.other.reference.link.markdown"], G),
     rule("Markdown link URLs", ["markup.underline.link", "markup.underline.link.markdown", "markup.underline.link.image.markdown", "punctuation.definition.link", "punctuation.definition.metadata.markdown"], c.comment),
     rule("Markdown horizontal rule", ["meta.separator.markdown"], c.comment),
 
@@ -554,30 +602,31 @@ export function buildTheme(variant) {
   const semanticTokenColors = {
     variable: c.fg,
     parameter: c.fg,
-    property: c.fg,
-    keyword: c.fg,
+    property: PR,
+    "property.declaration": PR,
     namespace: c.fg,
     module: c.fg,
     selfParameter: c.fg,
     clsParameter: c.fg,
-    function: c.dusty,
-    method: c.dusty,
-    "function.declaration": c.eucalyptus,
-    "method.declaration": c.eucalyptus,
-    decorator: c.dusty,
-    macro: c.dusty,
-    class: c.lavender,
-    interface: c.lavender,
-    type: c.lavender,
-    typeParameter: c.lavender,
-    enum: c.lavender,
-    struct: c.lavender,
-    builtinType: c.lavender,
-    enumMember: c.mauve,
-    builtinConstant: c.mauve,
-    number: c.mauve,
-    string: c.sand,
-    regexp: c.sand,
+    keyword: K,
+    function: C,
+    method: C,
+    "function.declaration": F,
+    "method.declaration": F,
+    macro: C,
+    decorator: D,
+    typeParameter: D,
+    class: T,
+    interface: T,
+    type: T,
+    enum: T,
+    struct: T,
+    builtinType: T,
+    enumMember: V,
+    builtinConstant: V,
+    number: V,
+    string: S,
+    regexp: S,
     comment: c.comment,
     "*.deprecated": { strikethrough: true },
   };
