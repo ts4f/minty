@@ -475,16 +475,24 @@
         "entity.other.inherited-class",
         "support.type",
         "support.class",
-        "storage.type.primitive",
-        "support.type.primitive",
-        "support.type.builtin",
         "entity.name.type.interface",
         "entity.name.type.alias",
         "entity.name.type.enum",
         "support.class.component"
       ],
       "settings": {
-        "foreground": "#ADA4D0"
+        "foreground": "#C4C7C5"
+      }
+    },
+    {
+      "name": "Built-in types",
+      "scope": [
+        "storage.type.primitive",
+        "support.type.primitive",
+        "support.type.builtin"
+      ],
+      "settings": {
+        "foreground": "#82CBAD"
       }
     },
     {
@@ -496,7 +504,7 @@
         "variable.function"
       ],
       "settings": {
-        "foreground": "#C4C7C5"
+        "foreground": "#ADA4D0"
       }
     },
     {
@@ -582,6 +590,15 @@
       ],
       "settings": {
         "foreground": "#ADA4D0"
+      }
+    },
+    {
+      "name": "Component tags (custom elements)",
+      "scope": [
+        "meta.tag.custom entity.name.tag"
+      ],
+      "settings": {
+        "foreground": "#D7B98E"
       }
     },
     {
@@ -896,19 +913,19 @@
     "selfParameter": "#C4C7C5",
     "clsParameter": "#C4C7C5",
     "keyword": "#82CBAD",
-    "function": "#C4C7C5",
-    "method": "#C4C7C5",
+    "function": "#ADA4D0",
+    "method": "#ADA4D0",
     "function.declaration": "#ADA4D0",
     "method.declaration": "#ADA4D0",
-    "macro": "#C4C7C5",
+    "macro": "#ADA4D0",
     "decorator": "#C29BB8",
     "typeParameter": "#C29BB8",
-    "class": "#ADA4D0",
-    "interface": "#ADA4D0",
-    "type": "#ADA4D0",
-    "enum": "#ADA4D0",
-    "struct": "#ADA4D0",
-    "builtinType": "#ADA4D0",
+    "class": "#C4C7C5",
+    "interface": "#C4C7C5",
+    "type": "#C4C7C5",
+    "enum": "#C4C7C5",
+    "struct": "#C4C7C5",
+    "builtinType": "#C4C7C5",
     "enumMember": "#D7B98E",
     "builtinConstant": "#D7B98E",
     "number": "#D7B98E",
