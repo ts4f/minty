@@ -6,16 +6,16 @@ import { mix } from "./color.mjs";
 /** Base palette. Each value is an opaque #RRGGBB color. */
 export const base = {
   bg: "#1E1E1E", // editor background, pure grey
-  fg: "#C4C7C5", // identifiers, function calls, object keys
+  fg: "#C4C7C5", // identifiers, type names, object keys
   fgBright: "#E8EAE9", // active tab and other emphasized UI text
 
-  eucalyptus: "#82CBAD", // pastel eucalyptus: keywords, Markdown headings, UI accents
+  eucalyptus: "#82CBAD", // pastel eucalyptus: keywords, built-in types, Markdown headings, UI accents
   dusty: "#8DB5A5", // strings: the quieter green
   deep: "#5F8575", // selection, bracket match, find matches, focus
 
-  lavender: "#ADA4D0", // types, classes, interfaces, function declarations
-  sand: "#D7B98E", // numbers, constants, booleans
-  mauve: "#C29BB8", // properties, fields, decorators
+  lavender: "#ADA4D0", // function declarations and calls, HTML tags, CSS selectors
+  sand: "#D7B98E", // numbers, constants, booleans, Angular component tags
+  mauve: "#C29BB8", // properties, fields, decorators, type parameters
   punct: "#8F9391", // punctuation and operators
   comment: "#7A7E7C", // comments
 
@@ -69,8 +69,10 @@ export function ansi(p) {
  *   string     string literals
  *   func       function and method declarations
  *   call       function and method calls
- *   type       classes, interfaces, types, JSX components
+ *   type       type names: classes, interfaces, enums, aliases, JSX components
+ *   builtin    built-in types written as words: void, boolean, string, number
  *   tag        HTML tags, CSS selectors, Markdown links
+ *   component  component tags in HTML templates: any hyphenated tag (app-pony, mat-icon)
  *   value      numbers, booleans, null, escapes, CSS keyword values
  *   decorator  decorators, annotations, type parameters
  *   prop       property access after a dot, class and interface fields
@@ -81,7 +83,7 @@ export const variants = [
     file: "minty-color-theme.json",
     name: "Minty",
     palette: base,
-    roles: { keyword: "eucalyptus", string: "dusty", func: "lavender", call: "fg", type: "lavender", tag: "lavender", value: "sand", decorator: "mauve", prop: "mauve" },
+    roles: { keyword: "eucalyptus", string: "dusty", func: "lavender", call: "lavender", type: "fg", builtin: "eucalyptus", tag: "lavender", component: "sand", value: "sand", decorator: "mauve", prop: "mauve" },
   },
 ];
 

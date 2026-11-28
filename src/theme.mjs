@@ -391,7 +391,7 @@ export function buildTheme(variant) {
   };
 
   const r = (role) => c[variant.roles[role]];
-  const K = r("keyword"), S = r("string"), F = r("func"), C = r("call"), T = r("type"), G = r("tag"), V = r("value"), D = r("decorator"), PR = r("prop");
+  const K = r("keyword"), S = r("string"), F = r("func"), C = r("call"), T = r("type"), B = r("builtin"), G = r("tag"), CO = r("component"), V = r("value"), D = r("decorator"), PR = r("prop");
   const P = c.punct;
 
   const tokenColors = [
@@ -475,14 +475,18 @@ export function buildTheme(variant) {
       "entity.other.inherited-class",
       "support.type",
       "support.class",
-      "storage.type.primitive",
-      "support.type.primitive",
-      "support.type.builtin",
       "entity.name.type.interface",
       "entity.name.type.alias",
       "entity.name.type.enum",
       "support.class.component",
     ], T),
+    // TS/JS built-in types (void, boolean, string, number, any, unknown). Python's int/str
+    // are support.type.python and stay with the type names.
+    rule("Built-in types", [
+      "storage.type.primitive",
+      "support.type.primitive",
+      "support.type.builtin",
+    ], B),
     rule("Function calls", [
       "entity.name.function",
       "support.function",
@@ -536,6 +540,9 @@ export function buildTheme(variant) {
 
     // ----- HTML / JSX -----
     rule("HTML tag names", ["entity.name.tag"], G),
+    // The HTML grammar scopes any hyphenated tag (app-pony, mat-icon) as meta.tag.custom.
+    // Angular LS sends no semantic tokens for .html files, so this is the only hook.
+    rule("Component tags (custom elements)", ["meta.tag.custom entity.name.tag"], CO),
     rule("HTML attributes", ["entity.other.attribute-name"], c.fg),
     rule("HTML tag brackets", ["punctuation.definition.tag", "meta.tag.sgml punctuation", "punctuation.separator.key-value.html"], P),
     rule("HTML doctype", ["meta.tag.sgml.doctype entity.name.tag", "meta.tag.sgml.doctype"], K),

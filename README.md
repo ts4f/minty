@@ -2,7 +2,7 @@
 
 A calm, minimal dark theme for VS Code built around eucalyptus green.
 
-Most code stays off-white, in the spirit of the JetBrains dark themes. Color shows up only where it carries meaning: pastel eucalyptus marks keywords, a dustier green marks strings, lavender marks types and function declarations, and mauve marks properties and fields. The background is a pure charcoal grey with no blue tint.
+Most code stays off-white, in the spirit of the JetBrains dark themes. Color shows up only where it carries meaning: pastel eucalyptus marks keywords and built-in types, a dustier green marks strings, lavender marks functions (declarations and calls), and mauve marks properties and fields. Type names stay off-white. The background is a pure charcoal grey with no blue tint.
 
 ![TypeScript](images/ts.png)
 
@@ -13,12 +13,12 @@ Most code stays off-white, in the spirit of the JetBrains dark themes. Color sho
 | Role | Color |
 |---|---|
 | Background | `#1E1E1E` |
-| Variables, parameters, function calls, object keys | `#C4C7C5` off-white |
-| Keywords, Markdown headings, UI accents | `#82CBAD` eucalyptus |
+| Variables, parameters, type names (classes, interfaces, imports), object keys | `#C4C7C5` off-white |
+| Keywords, built-in types (`void`, `boolean`, `string`), Markdown headings, UI accents | `#82CBAD` eucalyptus |
 | Strings | `#8DB5A5` dusty eucalyptus |
-| Function declarations, types, classes, interfaces, HTML tags | `#ADA4D0` lavender |
-| Properties, fields, decorators | `#C29BB8` mauve |
-| Numbers, constants, booleans | `#D7B98E` sand |
+| Function declarations and calls, HTML tags, CSS selectors | `#ADA4D0` lavender |
+| Properties, fields, decorators, type parameters (`T`) | `#C29BB8` mauve |
+| Numbers, constants, booleans, Angular component tags in templates | `#D7B98E` sand |
 | Punctuation and operators | `#8F9391` grey |
 | Comments | `#7A7E7C` grey |
 | Selection, bracket match, find matches | `#5F8575` deep eucalyptus |
@@ -36,7 +36,7 @@ From a packaged `.vsix`:
 
 ```sh
 npm run package
-code --install-extension minty-0.1.0.vsix
+code --install-extension minty-0.4.0.vsix
 ```
 
 Then pick **Minty** with `Preferences: Color Theme` (Ctrl+K Ctrl+T).
