@@ -16,6 +16,11 @@ export function buildTheme(variant) {
   const c = derive(variant.palette);
   const t = ansi(c);
   const sel = alpha(c.deep, 0.38);
+  // Popups (menus, quick pick, code actions) need a stronger, solid selection to stand out.
+  const popupSel = mix(c.widget, c.deep, 0.6);
+  // List hover is also the focused-row color in the code-action (lightbulb) popup,
+  // so it must stand out against the popup background, not just the editor.
+  const listHover = mix(c.bg, "#FFFFFF", 0.1);
   const transparent = "#00000000";
 
   const colors = {
@@ -79,7 +84,7 @@ export function buildTheme(variant) {
     "list.activeSelectionIconForeground": c.fgBright,
     "list.inactiveSelectionBackground": alpha(c.deep, 0.22),
     "list.inactiveSelectionForeground": c.fg,
-    "list.hoverBackground": c.lineHighlight,
+    "list.hoverBackground": listHover,
     "list.hoverForeground": c.fg,
     "list.focusOutline": c.deep,
     "list.focusBackground": alpha(c.deep, 0.22),
@@ -275,14 +280,14 @@ export function buildTheme(variant) {
     // ---------- quick input, menus, notifications ----------
     "quickInput.background": c.widget,
     "quickInput.foreground": c.fg,
-    "quickInputList.focusBackground": sel,
+    "quickInputList.focusBackground": popupSel,
     "quickInputList.focusForeground": c.fgBright,
     "quickInputTitle.background": c.chrome,
     "pickerGroup.foreground": c.eucalyptus,
     "pickerGroup.border": c.border,
     "menu.background": c.widget,
     "menu.foreground": c.fg,
-    "menu.selectionBackground": sel,
+    "menu.selectionBackground": popupSel,
     "menu.selectionForeground": c.fgBright,
     "menu.separatorBackground": c.border,
     "menu.border": c.border,
